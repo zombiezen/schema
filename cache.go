@@ -18,7 +18,7 @@ var invalidPath = errors.New("schema: invalid path")
 func newCache() *cache {
 	c := cache{
 		m:    make(map[reflect.Type]*structInfo),
-		conv: make(map[reflect.Type]Converter),
+		conv: make(map[reflect.Type]ErrorConverter),
 	}
 	for k, v := range converters {
 		c.conv[k] = v
@@ -30,7 +30,7 @@ func newCache() *cache {
 type cache struct {
 	l    sync.Mutex
 	m    map[reflect.Type]*structInfo
-	conv map[reflect.Type]Converter
+	conv map[reflect.Type]ErrorConverter
 }
 
 // parsePath parses a path in dotted notation verifying that it is a valid

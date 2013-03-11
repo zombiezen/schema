@@ -22,6 +22,11 @@ type Decoder struct {
 
 // RegisterConverter registers a converter function for a custom type.
 func (d *Decoder) RegisterConverter(value interface{}, converterFunc Converter) {
+	d.cache.conv[reflect.TypeOf(value)] = wrapConverter(converterFunc)
+}
+
+// RegisterErrorConverter registers a converter function for a custom type that provides errors.
+func (d *Decoder) RegisterErrorConverter(value interface{}, converterFunc ErrorConverter) {
 	d.cache.conv[reflect.TypeOf(value)] = converterFunc
 }
 
@@ -100,10 +105,10 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 			// We are just ignoring empty values for now.
 			return nil
 		} else if conv := d.cache.conv[t]; conv != nil {
-			if value := conv(values[0]); value.IsValid() {
+			if value, err := conv(values[0]); value.IsValid() && err == nil {
 				v.Set(value)
 			} else {
-				return ConversionError{path, -1}
+				return ConversionError{path, -1, err}
 			}
 		} else {
 			return fmt.Errorf("schema: converter not found for %v", t)
@@ -123,7 +128,7 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 			if value == "" {
 				// We are just ignoring empty values for now.
 				continue
-			} else if item := conv(value); item.IsValid() {
+			} else if item, err := conv(value); item.IsValid() && err == nil {
 				if isPtrElem {
 					ptr := reflect.New(elemT)
 					ptr.Elem().Set(item)
@@ -133,7 +138,7 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 			} else {
 				// If a single value is invalid should we give up
 				// or set a zero value?
-				return ConversionError{path, key}
+				return ConversionError{path, key, err}
 			}
 		}
 		value := reflect.Append(reflect.MakeSlice(t, 0, 0), items...)
@@ -148,14 +153,25 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 type ConversionError struct {
 	Key   string // key from the source map.
 	Index int    // index for multi-value fields; -1 for single-value fields.
+	Err   error  // specific error encountered, may be nil.
 }
 
 func (e ConversionError) Error() string {
-	if e.Index < 0 {
-		return fmt.Sprintf("schema: error converting value for %q", e.Key)
+	errString := ""
+	if e.Err != nil {
+		errString = e.Err.Error()
 	}
-	return fmt.Sprintf("schema: error converting value for index %d of %q",
-		e.Index, e.Key)
+	switch {
+	case errString == "" && e.Index < 0:
+		return fmt.Sprintf("schema: error converting value for %q", e.Key)
+	case errString == "":
+		return fmt.Sprintf("schema: error converting value for index %d of %q",
+			e.Index, e.Key)
+	case e.Index < 0:
+		return fmt.Sprintf("schema: error converting value for %q: %s", e.Key, errString)
+	}
+	return fmt.Sprintf("schema: error converting value for index %d of %q: %s",
+		e.Index, e.Key, errString)
 }
 
 // MultiError stores multiple decoding errors.

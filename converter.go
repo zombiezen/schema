@@ -5,11 +5,26 @@
 package schema
 
 import (
+	"errors"
 	"reflect"
 	"strconv"
 )
 
 type Converter func(string) reflect.Value
+
+type ErrorConverter func(string) (reflect.Value, error)
+
+var errInvalidValue = errors.New("")
+
+func wrapConverter(c Converter) ErrorConverter {
+	return func(value string) (reflect.Value, error) {
+		v := c(value)
+		if !v.IsValid() {
+			return v, errInvalidValue
+		}
+		return v, nil
+	}
+}
 
 var (
 	invalidValue = reflect.Value{}
@@ -30,7 +45,7 @@ var (
 )
 
 // Default converters for basic types.
-var converters = map[reflect.Type]Converter{
+var converters = map[reflect.Type]ErrorConverter{
 	boolType:    convertBool,
 	float32Type: convertFloat32,
 	float64Type: convertFloat64,
@@ -47,97 +62,110 @@ var converters = map[reflect.Type]Converter{
 	uint64Type:  convertUint64,
 }
 
-func convertBool(value string) reflect.Value {
-	if v, err := strconv.ParseBool(value); err == nil {
-		return reflect.ValueOf(v)
+func convertBool(value string) (reflect.Value, error) {
+	v, err := strconv.ParseBool(value)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(v), nil
 }
 
-func convertFloat32(value string) reflect.Value {
-	if v, err := strconv.ParseFloat(value, 32); err == nil {
-		return reflect.ValueOf(float32(v))
+func convertFloat32(value string) (reflect.Value, error) {
+	v, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(float32(v)), nil
 }
 
-func convertFloat64(value string) reflect.Value {
-	if v, err := strconv.ParseFloat(value, 64); err == nil {
-		return reflect.ValueOf(v)
+func convertFloat64(value string) (reflect.Value, error) {
+	v, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(v), nil
 }
 
-func convertInt(value string) reflect.Value {
-	if v, err := strconv.ParseInt(value, 10, 0); err == nil {
-		return reflect.ValueOf(int(v))
+func convertInt(value string) (reflect.Value, error) {
+	v, err := strconv.ParseInt(value, 10, 0)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(int(v)), nil
 }
 
-func convertInt8(value string) reflect.Value {
-	if v, err := strconv.ParseInt(value, 10, 8); err == nil {
-		return reflect.ValueOf(int8(v))
+func convertInt8(value string) (reflect.Value, error) {
+	v, err := strconv.ParseInt(value, 10, 8)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(int8(v)), nil
 }
 
-func convertInt16(value string) reflect.Value {
-	if v, err := strconv.ParseInt(value, 10, 16); err == nil {
-		return reflect.ValueOf(int16(v))
+func convertInt16(value string) (reflect.Value, error) {
+	v, err := strconv.ParseInt(value, 10, 16)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(int16(v)), nil
 }
 
-func convertInt32(value string) reflect.Value {
-	if v, err := strconv.ParseInt(value, 10, 32); err == nil {
-		return reflect.ValueOf(int32(v))
+func convertInt32(value string) (reflect.Value, error) {
+	v, err := strconv.ParseInt(value, 10, 32)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(int32(v)), nil
 }
 
-func convertInt64(value string) reflect.Value {
-	if v, err := strconv.ParseInt(value, 10, 64); err == nil {
-		return reflect.ValueOf(v)
+func convertInt64(value string) (reflect.Value, error) {
+	v, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(v), nil
 }
 
-func convertString(value string) reflect.Value {
-	return reflect.ValueOf(value)
+func convertString(value string) (reflect.Value, error) {
+	return reflect.ValueOf(value), nil
 }
 
-func convertUint(value string) reflect.Value {
-	if v, err := strconv.ParseUint(value, 10, 0); err == nil {
-		return reflect.ValueOf(uint(v))
+func convertUint(value string) (reflect.Value, error) {
+	v, err := strconv.ParseUint(value, 10, 0)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(uint(v)), nil
 }
 
-func convertUint8(value string) reflect.Value {
-	if v, err := strconv.ParseUint(value, 10, 8); err == nil {
-		return reflect.ValueOf(uint8(v))
+func convertUint8(value string) (reflect.Value, error) {
+	v, err := strconv.ParseUint(value, 10, 8)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(uint8(v)), nil
 }
 
-func convertUint16(value string) reflect.Value {
-	if v, err := strconv.ParseUint(value, 10, 16); err == nil {
-		return reflect.ValueOf(uint16(v))
+func convertUint16(value string) (reflect.Value, error) {
+	v, err := strconv.ParseUint(value, 10, 16)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(uint16(v)), nil
 }
 
-func convertUint32(value string) reflect.Value {
-	if v, err := strconv.ParseUint(value, 10, 32); err == nil {
-		return reflect.ValueOf(uint32(v))
+func convertUint32(value string) (reflect.Value, error) {
+	v, err := strconv.ParseUint(value, 10, 32)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(uint32(v)), nil
 }
 
-func convertUint64(value string) reflect.Value {
-	if v, err := strconv.ParseUint(value, 10, 64); err == nil {
-		return reflect.ValueOf(v)
+func convertUint64(value string) (reflect.Value, error) {
+	v, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return invalidValue, err
 	}
-	return invalidValue
+	return reflect.ValueOf(v), nil
 }
