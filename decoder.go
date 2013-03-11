@@ -95,7 +95,20 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 	}
 
 	// Simple case.
-	if t.Kind() == reflect.Slice {
+	if d.cache.conv[t] != nil || t.Kind() != reflect.Slice {
+		if values[0] == "" {
+			// We are just ignoring empty values for now.
+			return nil
+		} else if conv := d.cache.conv[t]; conv != nil {
+			if value := conv(values[0]); value.IsValid() {
+				v.Set(value)
+			} else {
+				return ConversionError{path, -1}
+			}
+		} else {
+			return fmt.Errorf("schema: converter not found for %v", t)
+		}
+	} else {
 		items := make([]reflect.Value, len(values))
 		elemT := t.Elem()
 		isPtrElem := elemT.Kind() == reflect.Ptr
@@ -125,19 +138,6 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 		}
 		value := reflect.Append(reflect.MakeSlice(t, 0, 0), items...)
 		v.Set(value)
-	} else {
-		if values[0] == "" {
-			// We are just ignoring empty values for now.
-			return nil
-		} else if conv := d.cache.conv[t]; conv != nil {
-			if value := conv(values[0]); value.IsValid() {
-				v.Set(value)
-			} else {
-				return ConversionError{path, -1}
-			}
-		} else {
-			return fmt.Errorf("schema: converter not found for %v", t)
-		}
 	}
 	return nil
 }

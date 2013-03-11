@@ -5,7 +5,8 @@
 package schema
 
 import (
-	//"reflect"
+	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -514,5 +515,33 @@ func TestConversionError(t *testing.T) {
 	m := e.(MultiError)
 	if len(m) != 3 {
 		t.Errorf("Expected 3 errors, got %v", m)
+	}
+}
+
+// ----------------------------------------------------------------------------
+
+type CommaSep []string
+
+func convertCommaSep(value string) reflect.Value {
+	return reflect.ValueOf(strings.Split(value, ","))
+}
+
+type S5 struct {
+	F01 CommaSep
+}
+
+func TestCustomSliceConversion(t *testing.T) {
+	data := map[string][]string{
+		"F01": {"foo,bar"},
+	}
+	s := &S5{}
+	d := NewDecoder()
+	d.RegisterConverter(CommaSep{}, convertCommaSep)
+	e := d.Decode(s, data)
+	if e != nil {
+		t.Error("error:", e)
+	}
+	if len(s.F01) != 2 || s.F01[0] != "foo" || s.F01[1] != "bar" {
+		t.Errorf("F01: expected %v, got %v", []string{"foo", "bar"}, s.F01)
 	}
 }
