@@ -101,13 +101,10 @@ func (d *Decoder) decode(v reflect.Value, path string, parts []pathPart,
 
 	// Simple case.
 	if d.cache.conv[t] != nil || t.Kind() != reflect.Slice {
-		if values[0] == "" {
-			// We are just ignoring empty values for now.
-			return nil
-		} else if conv := d.cache.conv[t]; conv != nil {
-			if value, err := conv(values[0]); value.IsValid() && err == nil {
+		if conv := d.cache.conv[t]; conv != nil {
+			if value, err := conv(values[0]); value.IsValid() {
 				v.Set(value)
-			} else {
+			} else if err != nil {
 				return ConversionError{path, -1, err}
 			}
 		} else {

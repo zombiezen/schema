@@ -63,6 +63,9 @@ var converters = map[reflect.Type]ErrorConverter{
 }
 
 func convertBool(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseBool(value)
 	if err != nil {
 		return invalidValue, err
@@ -71,6 +74,9 @@ func convertBool(value string) (reflect.Value, error) {
 }
 
 func convertFloat32(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseFloat(value, 32)
 	if err != nil {
 		return invalidValue, err
@@ -79,6 +85,9 @@ func convertFloat32(value string) (reflect.Value, error) {
 }
 
 func convertFloat64(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseFloat(value, 64)
 	if err != nil {
 		return invalidValue, err
@@ -87,6 +96,9 @@ func convertFloat64(value string) (reflect.Value, error) {
 }
 
 func convertInt(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseInt(value, 10, 0)
 	if err != nil {
 		return invalidValue, err
@@ -95,6 +107,9 @@ func convertInt(value string) (reflect.Value, error) {
 }
 
 func convertInt8(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseInt(value, 10, 8)
 	if err != nil {
 		return invalidValue, err
@@ -103,6 +118,9 @@ func convertInt8(value string) (reflect.Value, error) {
 }
 
 func convertInt16(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseInt(value, 10, 16)
 	if err != nil {
 		return invalidValue, err
@@ -111,6 +129,9 @@ func convertInt16(value string) (reflect.Value, error) {
 }
 
 func convertInt32(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
 		return invalidValue, err
@@ -119,6 +140,9 @@ func convertInt32(value string) (reflect.Value, error) {
 }
 
 func convertInt64(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return invalidValue, err
@@ -131,6 +155,9 @@ func convertString(value string) (reflect.Value, error) {
 }
 
 func convertUint(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseUint(value, 10, 0)
 	if err != nil {
 		return invalidValue, err
@@ -139,6 +166,9 @@ func convertUint(value string) (reflect.Value, error) {
 }
 
 func convertUint8(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseUint(value, 10, 8)
 	if err != nil {
 		return invalidValue, err
@@ -147,6 +177,9 @@ func convertUint8(value string) (reflect.Value, error) {
 }
 
 func convertUint16(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseUint(value, 10, 16)
 	if err != nil {
 		return invalidValue, err
@@ -155,6 +188,9 @@ func convertUint16(value string) (reflect.Value, error) {
 }
 
 func convertUint32(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseUint(value, 10, 32)
 	if err != nil {
 		return invalidValue, err
@@ -163,6 +199,9 @@ func convertUint32(value string) (reflect.Value, error) {
 }
 
 func convertUint64(value string) (reflect.Value, error) {
+	if value == "" {
+		return invalidValue, nil
+	}
 	v, err := strconv.ParseUint(value, 10, 64)
 	if err != nil {
 		return invalidValue, err
